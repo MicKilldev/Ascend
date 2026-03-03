@@ -15,25 +15,23 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'guest') {
 
     <div class="main-content">
         <h1>Hiring & Internship Portal</h1>
-        <p>Welcome,
-            <?php echo htmlspecialchars($_SESSION['username']); ?> 👋
-        </p>
+        <p>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?> 👋</p>
 
         <div class="card-container">
             <div class="card">
                 <h3>Verified Graduates</h3>
                 <h1>348</h1>
-                <p>Available for hire</p>
+                <div class="card-footer" style="color: #00d2ff; font-weight: 600;">Available for hire</div>
             </div>
             <div class="card">
                 <h3>Internship Slots</h3>
                 <h1>12</h1>
-                <p>Open positions this term</p>
+                <div class="card-footer">Open positions this term</div>
             </div>
             <div class="card">
                 <h3>Skills Match</h3>
                 <h1>94%</h1>
-                <p>Industry alignment rate</p>
+                <div class="card-footer" style="color: #a855f7; font-weight: 600;">Industry alignment rate</div>
             </div>
         </div>
     </div>

@@ -1,13 +1,106 @@
+<?php
+$role = $_SESSION['role'] ?? 'guest';
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
 <div class="sidebar">
-    <h2 class="logo">Ascend</h2>
+    <h2 class="logo">ASCEND</h2>
 
     <ul>
-        <li><a href="dashboard.php" class="active">Dashboard</a></li>
-        <li><a href="#">Grades</a></li>
-        <li><a href="#">Portfolio</a></li>
-        <li><a href="#">Badge</a></li>
-        <li><a href="#">Progress</a></li>
-        <li><a href="#">Settings</a></li>
-        <li><a href="../logout.php">Logout</a></li>
+        <!-- Common Dashboard -->
+        <li>
+            <a href="dashboard.php" class="<?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>">
+                <i class="ph ph-squares-four"></i> Dashboard
+            </a>
+        </li>
+
+        <?php if ($role == 'teacher' || $role == 'faculty' || $role == 'school_admin'): ?>
+            <!-- Teacher/Admin Specific -->
+            <li>
+                <a href="users.php" class="<?php echo $current_page == 'users.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-users"></i> All Users
+                </a>
+            </li>
+            <li>
+                <a href="students.php" class="<?php echo $current_page == 'students.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-student"></i> Students
+                </a>
+            </li>
+            <li>
+                <a href="analytics.php" class="<?php echo $current_page == 'analytics.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-chart-line-up"></i> Analytics
+                </a>
+            </li>
+            <li>
+                <a href="grades.php" class="<?php echo $current_page == 'grades.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-chart-bar"></i> Grades
+                </a>
+            </li>
+            <li>
+                <a href="portfolio.php" class="<?php echo $current_page == 'portfolio.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-folder-open"></i> Portfolios
+                </a>
+            </li>
+
+        <?php elseif ($role == 'student'): ?>
+            <!-- Student Specific -->
+            <li>
+                <a href="grades.php" class="<?php echo $current_page == 'grades.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-chart-bar"></i> My Grades
+                </a>
+            </li>
+            <li>
+                <a href="portfolio.php" class="<?php echo $current_page == 'portfolio.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-user-circle"></i> Portfolio
+                </a>
+            </li>
+            <li>
+                <a href="badges.php" class="<?php echo $current_page == 'badges.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-trophy"></i> My Badges
+                </a>
+            </li>
+            <li>
+                <a href="progress.php" class="<?php echo $current_page == 'progress.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-trend-up"></i> Progress Tracker
+                </a>
+            </li>
+
+        <?php elseif ($role == 'parent'): ?>
+            <!-- Parent Specific -->
+            <li>
+                <a href="child_grades.php" class="<?php echo $current_page == 'child_grades.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-chart-bar"></i> Child's Grades
+                </a>
+            </li>
+            <li>
+                <a href="child_progress.php" class="<?php echo $current_page == 'child_progress.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-trend-up"></i> Progress
+                </a>
+            </li>
+
+        <?php elseif ($role == 'guest'): ?>
+            <!-- Guest Portal -->
+            <li>
+                <a href="talents.php" class="<?php echo $current_page == 'talents.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-users-three"></i> Scout Talents
+                </a>
+            </li>
+            <li>
+                <a href="internships.php" class="<?php echo $current_page == 'internships.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-briefcase"></i> Internships
+                </a>
+            </li>
+        <?php endif; ?>
+
+        <!-- Common Settings & Logout -->
+        <li>
+            <a href="settings.php" class="<?php echo $current_page == 'settings.php' ? 'active' : ''; ?>">
+                <i class="ph ph-gear"></i> Settings
+            </a>
+        </li>
+        <li>
+            <a href="../logout.php" style="color: #f87171;">
+                <i class="ph ph-sign-out"></i> Logout
+            </a>
+        </li>
     </ul>
 </div>

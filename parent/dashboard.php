@@ -21,16 +21,22 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
             <div class="card">
                 <h3>Child's GPA</h3>
                 <h1>1.50</h1>
-                <p>Good Standing</p>
+                <div class="card-footer" style="color: #10b981; font-weight: 600;">✓ Good Standing</div>
             </div>
             <div class="card">
                 <h3>Attendance Rate</h3>
                 <h1>94%</h1>
-                <p>This semester</p>
+                <div class="card-footer">This semester</div>
             </div>
             <div class="card">
                 <h3>Recent Achievement</h3>
-                <p>🏅 Academic Excellence Badge</p>
+                <div class="badge-item">
+                    <span style="font-size: 1.5rem;">🏅</span>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.9rem;">Academic Excellence</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">Awarded Feb 15, 2026</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -5,7 +5,7 @@ include('config/db.php');
 // Get selected role for visual feedback
 $selectedRole = isset($_GET['role']) ? $_GET['role'] : 'general';
 $portalTitles = [
-    'teacher' => 'Teachers & Admin Portal',
+    'faculty' => 'Teachers & Admin Portal',
     'student' => 'Student Portal',
     'parent' => 'Parent Portal',
     'guest' => 'Hiring & Internships Portal',
@@ -27,45 +27,58 @@ if (isset($_POST['login'])) {
 
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
-        $_SESSION['role'] = $user['role'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['username'] = $user['username'] ?? $user['email'];
-        $_SESSION['user_id'] = $user['id'];
 
-        // Set flash message for success alert on dashboards
-        $roleLabelMap = [
-            'teacher' => 'Teacher & Admin',
-            'faculty' => 'Teacher & Admin',
-            'school_admin' => 'Teacher & Admin',
-            'student' => 'Student',
-            'parent' => 'Parent',
-            'guest' => 'Hiring & Internship Guest',
+        // Define allowed role mappings for each portal
+        $allowedRoles = [
+            'faculty' => ['teacher', 'faculty', 'school_admin'],
+            'student' => ['student'],
+            'parent' => ['parent'],
+            'guest' => ['guest'],
+            'general' => [] // Should redirect to specific portal
         ];
-        $roleLabel = $roleLabelMap[$user['role']] ?? 'User';
-        $_SESSION['flash_success'] = "Welcome back, {$_SESSION['username']}! You are logged in as <strong>{$roleLabel}</strong>.";
 
-        // Role-Based Routing
-        switch ($user['role']) {
-            case 'faculty':
-            case 'school_admin':
-            case 'teacher':
-                header("Location: teacher/dashboard.php");
-                break;
-            case 'student':
-                header("Location: student/dashboard.php");
-                break;
-            case 'parent':
-                header("Location: parent/dashboard.php");
-                break;
-            case 'guest':
-                header("Location: guest/dashboard.php");
-                break;
-            default:
-                header("Location: index.php");
+        // Check if user is allowed in the selected portal
+        $isAllowed = false;
+        if ($selectedRole === 'general') {
+            $isAllowed = true; // General login can route to any
+        } elseif (isset($allowedRoles[$selectedRole]) && in_array($user['role'], $allowedRoles[$selectedRole])) {
+            $isAllowed = true;
         }
-        exit();
+
+        if ($isAllowed) {
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['username'] = $user['username'] ?? $user['email'];
+            $_SESSION['id'] = $user['id'];
+            $_SESSION['flash_success'] = "Welcome back, " . ($_SESSION['username']) . "! High-performance session initiated.";
+
+            // Role-Based Routing
+            switch ($user['role']) {
+                case 'faculty':
+                case 'school_admin':
+                case 'teacher':
+                    header("Location: teacher/dashboard.php");
+                    break;
+                case 'student':
+                    header("Location: student/dashboard.php");
+                    break;
+                case 'parent':
+                    header("Location: parent/dashboard.php");
+                    break;
+                case 'guest':
+                    header("Location: guest/dashboard.php");
+                    break;
+                default:
+                    header("Location: index.php");
+            }
+            exit();
+        } else {
+            $loginError = true;
+            $errorMessage = "Access denied. Your account does not have permission to access the " . htmlspecialchars($displayTitle) . ".";
+        }
     } else {
         $loginError = true;
+        $errorMessage = "Invalid email or password. Please try again.";
     }
 }
 ?>
@@ -316,7 +329,7 @@ if (isset($_POST['login'])) {
             <?php if ($loginError): ?>
                 <div class="error-msg">
                     <i class="ph ph-warning-circle"></i>
-                    Invalid email or password. Please try again.
+                    <?php echo $errorMessage ?? "Invalid email or password. Please try again."; ?>
                 </div>
             <?php endif; ?>
 

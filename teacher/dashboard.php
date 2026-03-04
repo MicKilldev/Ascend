@@ -524,8 +524,8 @@ $usersResult = $usersStmt->get_result();
                     <option value="" disabled selected>Select child account...</option>
                     <?php foreach ($all_students as $st): ?>
                         <option value="<?php echo $st['student_record_id']; ?>">
-                        
-                                <?php echo htmlspecialchars($st['username']); ?></option>
+                            <?php echo htmlspecialchars($st['username']); ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>

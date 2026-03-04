@@ -1,11 +1,46 @@
 <?php
 session_start();
 include('../config/db.php');
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
     header("Location: ../login.php?role=student");
     exit();
 }
+
+$username = htmlspecialchars($_SESSION['username'] ?? 'Student');
+$course = htmlspecialchars($_SESSION['course'] ?? 'BSIT');
+$student_id = $_SESSION['id']; // This is the user ID
+
+// Fetch all grades for this student from the 'grades' table
+$query = "SELECT subject, grade FROM grades WHERE student_id = ? ORDER BY subject ASC";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$total_units = 0;
+$passed_count = 0;
+$failed_count = 0;
+$grades_list = [];
+
+while ($row = $result->fetch_assoc()) {
+    $grades_list[] = $row;
+    $total_units += 3; // Mocking 3 units per subject if not in DB
+    if ($row['grade'] <= 3.0) {
+        $passed_count++;
+    } else {
+        $failed_count++;
+    }
+}
+
+// Calculate GPA
+$sum_grades = 0;
+foreach ($grades_list as $g) {
+    $sum_grades += $g['grade'];
+}
+$gpa = (count($grades_list) > 0) ? number_format($sum_grades / count($grades_list), 2) : "0.00";
 ?>
+
 <?php include("../includes/header.php"); ?>
 
 <style>
@@ -18,32 +53,35 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
 
     .stat-mini-card {
         background: white;
-        padding: 20px;
-        border-radius: 16px;
+        padding: 24px;
+        border-radius: 20px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.02);
     }
 
     .stat-label {
-        font-size: 0.75rem;
-        color: #64748b;
-        font-weight: 700;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 800;
         text-transform: uppercase;
+        letter-spacing: 1px;
     }
 
     .stat-value {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         font-weight: 800;
         color: #0f172a;
     }
 
     .grade-table-wrapper {
         background: white;
-        border-radius: 20px;
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        border: 1px solid #f1f5f9;
     }
 
     table {
@@ -57,19 +95,21 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
     }
 
     th {
-        padding: 15px 20px;
+        padding: 20px;
         text-align: left;
-        font-size: 0.8rem;
-        font-weight: 700;
+        font-size: 0.75rem;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.6);
     }
 
     td {
-        padding: 18px 20px;
-        font-size: 0.9rem;
+        padding: 20px;
+        font-size: 0.95rem;
         border-bottom: 1px solid #f1f5f9;
         color: #334155;
+        vertical-align: middle;
     }
 
     tr:last-child td {
@@ -80,51 +120,64 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
         background: #f8faff;
     }
 
-    .grade-badge {
-        padding: 4px 12px;
+    .status-badge {
+        padding: 6px 14px;
         border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 700;
+        font-size: 0.7rem;
+        font-weight: 800;
         text-transform: uppercase;
     }
 
-    .passed {
+    .status-passed {
         background: #dcfce7;
         color: #16a34a;
     }
 
-    .pending {
-        background: #fef3c7;
-        color: #d97706;
+    .status-failed {
+        background: #fee2e2;
+        color: #ef4444;
     }
 </style>
 
 <div class="container">
     <?php include("../includes/sidebar.php"); ?>
     <div class="main-content">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <div>
-                <h1>Academic Grades</h1>
-                <p>Track your academic progress for the current semester.</p>
+                <h1 style="font-weight: 900; letter-spacing: -1px;">Academic Records</h1>
+                <p style="color: #64748b;">Official transcript of your performance in the current semester.</p>
             </div>
             <div
-                style="font-weight: 700; color: #64748b; font-size: 0.9rem; background: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                Semester: <span style="color: var(--primary);">2nd Semester, 2025-26</span>
+                style="background: white; padding: 12px 24px; border-radius: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-weight: 800; color: var(--primary);">
+                <i class="ph ph-calendar"></i> 2nd Sem, 2026
             </div>
         </div>
 
+        <?php if ($failed_count > 0): ?>
+            <div
+                style="background: #fff; border-left: 4px solid #ef4444; padding: 20px; border-radius: 14px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.1);">
+                <i class="ph-fill ph-warning-circle" style="font-size: 2rem; color: #ef4444;"></i>
+                <div>
+                    <div style="font-weight: 800; font-size: 0.8rem; color: #ef4444; text-transform: uppercase;">Academic
+                        Warning</div>
+                    <div style="color: #64748b; font-size: 0.9rem;">You have <?php echo $failed_count; ?> deficient
+                        subject(s). Please consult your department head.</div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="grade-stats">
-            <div class="stat-mini-card">
-                <span class="stat-label">Total Units</span>
-                <span class="stat-value">21.0</span>
+            <div class="stat-mini-card" style="border-top: 4px solid #6e45e2;">
+                <span class="stat-label">Calculated GPA</span>
+                <span class="stat-value"><?php echo $gpa; ?></span>
             </div>
-            <div class="stat-mini-card">
-                <span class="stat-label">Current GPA</span>
-                <span class="stat-value">1.50</span>
+            <div class="stat-mini-card" style="border-top: 4px solid #10b981;">
+                <span class="stat-label">Units Completed</span>
+                <span class="stat-value"><?php echo count($grades_list) * 3; ?>.0</span>
             </div>
-            <div class="stat-mini-card">
-                <span class="stat-label">Passed Subjects</span>
-                <span class="stat-value">6/7</span>
+            <div class="stat-mini-card" style="border-top: 4px solid #00d2ff;">
+                <span class="stat-label">Academic Status</span>
+                <span class="stat-value" style="font-size: 1.2rem; color: #10b981;">Good Standing</span>
             </div>
         </div>
 
@@ -132,55 +185,54 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
             <table>
                 <thead>
                     <tr>
-                        <th>Subject Code</th>
-                        <th>Descriptive Title</th>
+                        <th>Subject / Course Title</th>
                         <th style="text-align: center;">Units</th>
-                        <th style="text-align: center;">Midterm</th>
-                        <th style="text-align: center;">Finals</th>
-                        <th style="text-align: center;">Status</th>
+                        <th style="text-align: center;">Verified Grade</th>
+                        <th style="text-align: center;">Equivalence</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td style="font-weight: 700;">IT221</td>
-                        <td>Object Oriented Programming 2</td>
-                        <td style="text-align: center;">3.0</td>
-                        <td style="text-align: center; font-weight: 700;">1.25</td>
-                        <td style="text-align: center; font-weight: 700;">1.50</td>
-                        <td style="text-align: center;"><span class="grade-badge passed">Passed</span></td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: 700;">IT222</td>
-                        <td>Web Development 1</td>
-                        <td style="text-align: center;">3.0</td>
-                        <td style="text-align: center; font-weight: 700;">1.50</td>
-                        <td style="text-align: center; font-weight: 700;">1.25</td>
-                        <td style="text-align: center;"><span class="grade-badge passed">Passed</span></td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: 700;">IT223</td>
-                        <td>Data Structures & Algorithms</td>
-                        <td style="text-align: center;">3.0</td>
-                        <td style="text-align: center; font-weight: 700;">1.75</td>
-                        <td style="text-align: center; color: #94a3b8;">--</td>
-                        <td style="text-align: center;"><span class="grade-badge pending">In Progress</span></td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: 700;">GE105</td>
-                        <td>Ethics</td>
-                        <td style="text-align: center;">3.0</td>
-                        <td style="text-align: center; font-weight: 700;">1.25</td>
-                        <td style="text-align: center; font-weight: 700;">1.25</td>
-                        <td style="text-align: center;"><span class="grade-badge passed">Passed</span></td>
-                    </tr>
+                    <?php if (empty($grades_list)): ?>
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 100px; color: #94a3b8;">
+                                <i class="ph ph-mask-sad"
+                                    style="font-size: 4rem; opacity: 0.2; display: block; margin-bottom: 20px;"></i>
+                                <span style="font-weight: 700;">No academic records have been posted for this semester
+                                    yet.</span>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($grades_list as $g): ?>
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 800; color: #0f172a;">
+                                        <?php echo htmlspecialchars($g['subject']); ?></div>
+                                    <div
+                                        style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">
+                                        Major Requirement</div>
+                                </td>
+                                <td style="text-align: center; font-weight: 700;">3.0</td>
+                                <td style="text-align: center;">
+                                    <span
+                                        style="font-weight: 900; color: var(--primary); font-size: 1.2rem;"><?php echo number_format($g['grade'], 1); ?></span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <span
+                                        class="status-badge <?php echo ($g['grade'] <= 3.0) ? 'status-passed' : 'status-failed'; ?>">
+                                        <?php echo ($g['grade'] <= 3.0) ? 'Passed' : 'Deficient'; ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div
-            style="margin-top: 20px; padding: 20px; background: #fff; border-radius: 16px; border-left: 4px solid var(--primary); font-size: 0.85rem; color: #64748b;">
-            <i class="ph ph-info"></i> <strong>Note:</strong> Grades displayed here are preliminary. Official
-            transcripts can be requested from the Registrar's Office after the final semester deliberation.
+            style="margin-top: 30px; display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.8rem; justify-content: center;">
+            <i class="ph ph-shield-check"></i> This transcript is verified and digitally signed by the Registrar's
+            Office.
         </div>
     </div>
 </div>

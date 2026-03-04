@@ -14,32 +14,37 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </li>
 
         <?php if ($role == 'teacher' || $role == 'faculty' || $role == 'school_admin'): ?>
-            <!-- Teacher/Admin Specific -->
-            <li>
-                <a href="users.php" class="<?php echo $current_page == 'users.php' ? 'active' : ''; ?>">
-                    <i class="ph ph-users"></i> All Users
-                </a>
-            </li>
+            <?php if ($role === 'school_admin'): ?>
+                <li>
+                    <a href="users.php" class="<?php echo $current_page == 'users.php' ? 'active' : ''; ?>">
+                        <i class="ph ph-users"></i> Global Registry
+                    </a>
+                </li>
+            <?php endif; ?>
             <li>
                 <a href="students.php" class="<?php echo $current_page == 'students.php' ? 'active' : ''; ?>">
                     <i class="ph ph-student"></i> Students
                 </a>
             </li>
-            <li>
-                <a href="analytics.php" class="<?php echo $current_page == 'analytics.php' ? 'active' : ''; ?>">
-                    <i class="ph ph-chart-line-up"></i> Analytics
-                </a>
-            </li>
+            <?php if ($role === 'school_admin'): ?>
+                <li>
+                    <a href="analytics.php" class="<?php echo $current_page == 'analytics.php' ? 'active' : ''; ?>">
+                        <i class="ph ph-chart-line-up"></i> Population Analytics
+                    </a>
+                </li>
+            <?php endif; ?>
             <li>
                 <a href="grades.php" class="<?php echo $current_page == 'grades.php' ? 'active' : ''; ?>">
                     <i class="ph ph-chart-bar"></i> Grades
                 </a>
             </li>
-            <li>
-                <a href="portfolio.php" class="<?php echo $current_page == 'portfolio.php' ? 'active' : ''; ?>">
-                    <i class="ph ph-folder-open"></i> Portfolios
-                </a>
-            </li>
+            <?php if ($role === 'school_admin'): ?>
+                <li>
+                    <a href="portfolio.php" class="<?php echo $current_page == 'portfolio.php' ? 'active' : ''; ?>">
+                        <i class="ph ph-folder-open"></i> Portfolios
+                    </a>
+                </li>
+            <?php endif; ?>
 
         <?php elseif ($role == 'student'): ?>
             <!-- Student Specific -->

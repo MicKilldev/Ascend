@@ -9,11 +9,21 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['teacher', 'facul
 
 $username = htmlspecialchars($_SESSION['username'] ?? 'Admin');
 
-// Fetch only Students
+// Fetch Students based on role and program
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$role = $_SESSION['role'];
+$teacher_course = $_SESSION['course'] ?? '';
+
 $sql = "SELECT id, username, email, course, created_at FROM users WHERE role='student'";
 $params = [];
 $types = '';
+
+// Program filtering: Teachers ONLY see their program
+if ($role === 'teacher' && !empty($teacher_course)) {
+    $sql .= " AND course = ?";
+    $params[] = $teacher_course;
+    $types .= 's';
+}
 
 if ($search !== '') {
     $sql .= " AND (username LIKE ? OR email LIKE ? OR course LIKE ?)";

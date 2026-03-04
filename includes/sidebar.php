@@ -76,6 +76,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="ph ph-trend-up"></i> Progress
                 </a>
             </li>
+            <li>
+                <a href="ledger.php" class="<?php echo $current_page == 'ledger.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-receipt"></i> Student Ledger
+                </a>
+            </li>
+            <li>
+                <a href="periodic_dues.php" class="<?php echo $current_page == 'periodic_dues.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-calendar-check"></i> Periodic Dues
+                </a>
+            </li>
 
         <?php elseif ($role == 'guest'): ?>
             <!-- Guest Portal -->

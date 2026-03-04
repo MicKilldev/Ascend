@@ -1,1 +1,2 @@
-<?php header('Location: ../login.php?role=guest'); exit(); ?>
+<?php header('Location: ../login.php?role=guest');
+exit(); ?>

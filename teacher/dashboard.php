@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
     $new_role = trim($_POST['new_role'] ?? '');
     $new_course = trim($_POST['new_course'] ?? 'General');
 
-    $allowed_roles = ['student', 'teacher', 'parent', 'guest', 'faculty', 'school_admin', 'registrar', 'cashier', 'librarian'];
+    $allowed_roles = ['student', 'teacher', 'parent', 'faculty', 'school_admin', 'registrar', 'cashier', 'librarian'];
     if ($_SESSION['role'] !== 'school_admin') {
         $flash = "Access Denied: Only School Administrators can create accounts.";
         $flashType = 'error';
@@ -50,19 +50,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
             $flash = "An account with that email already exists.";
             $flashType = 'error';
         } else {
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password, role, course) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssss", $new_username, $new_email, $new_password, $new_role, $new_course);
-            if ($stmt->execute()) {
+            $conn->begin_transaction();
+            try {
+                $stmt = $conn->prepare("INSERT INTO users (username, email, password, role, course) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssss", $new_username, $new_email, $new_password, $new_role, $new_course);
+                $stmt->execute();
+                $last_user_id = $conn->insert_id;
+
+                if ($new_role === 'student') {
+                    $st_stmt = $conn->prepare("INSERT INTO students (user_id, course) VALUES (?, ?)");
+                    $st_stmt->bind_param("is", $last_user_id, $new_course);
+                    $st_stmt->execute();
+                }
+
+                // Handle Parent-Student Linking
+                if ($new_role === 'parent' && isset($_POST['linked_student_id'])) {
+                    $student_record_id = intval($_POST['linked_student_id']);
+                    $p_stmt = $conn->prepare("INSERT INTO parents (user_id, student_id, parent_name) VALUES (?, ?, ?)");
+                    $p_stmt->bind_param("iis", $last_user_id, $student_record_id, $new_username);
+                    $p_stmt->execute();
+                }
+
+                $conn->commit();
                 $flash = "Account for <strong>" . htmlspecialchars($new_username) . "</strong> created successfully as <strong>" . ucfirst($new_role) . "</strong>.";
                 if ($new_role == 'teacher' || $new_role == 'student') {
                     $flash .= " Program: <strong>" . htmlspecialchars($new_course) . "</strong>.";
                 }
-            } else {
-                $flash = "Database error: " . $conn->error;
+            } catch (Exception $e) {
+                $conn->rollback();
+                $flash = "Database error: " . $e->getMessage();
                 $flashType = 'error';
             }
         }
     }
+}
+
+// Fetch Student Profile Records for Parent Linking
+$students_query = $conn->query("SELECT s.id as student_record_id, u.username FROM students s JOIN users u ON s.user_id = u.id ORDER BY u.username ASC");
+$all_students = [];
+while ($row = $students_query->fetch_assoc()) {
+    $all_students[] = $row;
 }
 
 /* ===================================================
@@ -485,7 +512,21 @@ $usersResult = $usersStmt->get_result();
                     <option value="librarian">Library Admin</option>
                     <option value="school_admin">System Administrator</option>
                     <option value="parent">Parent Portal</option>
-                    <option value="guest">Hiring Partner</option>
+                </select>
+            </div>
+
+            <div id="parentCont" style="display:none; margin-bottom: 20px;">
+                <label
+                    style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">Select
+                    Student (Authorized Child)</label>
+                <select name="linked_student_id"
+                    style="width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-weight: 600;">
+                    <option value="" disabled selected>Select child account...</option>
+                    <?php foreach ($all_students as $st): ?>
+                        <option value="<?php echo $st['student_record_id']; ?>">
+                        
+                                <?php echo htmlspecialchars($st['username']); ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
 
@@ -541,8 +582,11 @@ $usersResult = $usersStmt->get_result();
 <script>
     function handleRoleChange() {
         const role = document.getElementById('roleSelector').value;
-        const cont = document.getElementById('progCont');
-        cont.style.display = (role === 'teacher' || role === 'student') ? 'block' : 'none';
+        const progCont = document.getElementById('progCont');
+        const parentCont = document.getElementById('parentCont');
+
+        progCont.style.display = (role === 'teacher' || role === 'student') ? 'block' : 'none';
+        parentCont.style.display = (role === 'parent') ? 'block' : 'none';
     }
 </script>
 

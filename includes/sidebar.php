@@ -1,5 +1,5 @@
 <?php
-$role = $_SESSION['role'] ?? 'guest';
+$role = $_SESSION['role'] ?? 'portal';
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <div class="sidebar">
@@ -78,14 +78,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <li>
                 <a href="periodic_dues.php" class="<?php echo $current_page == 'periodic_dues.php' ? 'active' : ''; ?>">
                     <i class="ph ph-calendar-check"></i> Periodic Dues
-                </a>
-            </li>
-
-        <?php elseif ($role == 'guest'): ?>
-            <!-- Guest Portal -->
-            <li>
-                <a href="talents.php" class="<?php echo $current_page == 'talents.php' ? 'active' : ''; ?>">
-                    <i class="ph ph-users-three"></i> Scout Talents
                 </a>
             </li>
 

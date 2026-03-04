@@ -38,13 +38,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="ph ph-chart-bar"></i> Grades
                 </a>
             </li>
-            <?php if ($role === 'school_admin'): ?>
-                <li>
-                    <a href="portfolio.php" class="<?php echo $current_page == 'portfolio.php' ? 'active' : ''; ?>">
-                        <i class="ph ph-folder-open"></i> Portfolios
-                    </a>
-                </li>
-            <?php endif; ?>
 
         <?php elseif ($role == 'student'): ?>
             <!-- Student Specific -->
@@ -53,11 +46,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="ph ph-chart-bar"></i> My Grades
                 </a>
             </li>
-            <li>
-                <a href="portfolio.php" class="<?php echo $current_page == 'portfolio.php' ? 'active' : ''; ?>">
-                    <i class="ph ph-user-circle"></i> Portfolio
-                </a>
-            </li>
+
             <li>
                 <a href="badges.php" class="<?php echo $current_page == 'badges.php' ? 'active' : ''; ?>">
                     <i class="ph ph-trophy"></i> My Badges
@@ -99,11 +88,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="ph ph-users-three"></i> Scout Talents
                 </a>
             </li>
-            <li>
-                <a href="internships.php" class="<?php echo $current_page == 'internships.php' ? 'active' : ''; ?>">
-                    <i class="ph ph-briefcase"></i> Internships
-                </a>
-            </li>
+
         <?php endif; ?>
 
         <!-- Common Settings & Logout -->

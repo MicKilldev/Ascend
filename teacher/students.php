@@ -218,11 +218,12 @@ $total_count = $students->num_rows;
                         </div>
                     </div>
 
-                    <button
-                        style="width: 100%; margin-top: 20px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; font-weight: 700; color: #64748b; cursor: pointer; transition: 0.2s;"
-                        onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                    <a href="student_analytics.php?id=<?php echo $s['id']; ?>"
+                        style="display: block; text-align: center; width: 100%; margin-top: 20px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; font-weight: 700; color: #64748b; text-decoration: none; transition: 0.2s;"
+                        onmouseover="this.style.background='#f8fafc'; this.style.color='var(--primary)';"
+                        onmouseout="this.style.background='white'; this.style.color='#64748b';">
                         View Analytics →
-                    </button>
+                    </a>
                 </div>
             <?php endwhile; ?>
         </div>

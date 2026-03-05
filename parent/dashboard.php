@@ -46,7 +46,8 @@ $outstanding = $total_assessed - $total_paid;
             <div>
                 <h1>Parent Dashboard</h1>
                 <p>Welcome back, <strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong> 👋 tracking
-                    <strong><?php echo $student_name; ?>'s</strong> progress.</p>
+                    <strong><?php echo $student_name; ?>'s</strong> progress.
+                </p>
             </div>
         </div>
 

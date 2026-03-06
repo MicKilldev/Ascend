@@ -26,7 +26,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="ph ph-student"></i> Students
                 </a>
             </li>
-            <?php if ($role === 'school_admin'): ?>
+            <?php if ($role === 'school_admin' || $role === 'teacher' || $role === 'faculty'): ?>
                 <li>
                     <a href="analytics.php" class="<?php echo $current_page == 'analytics.php' ? 'active' : ''; ?>">
                         <i class="ph ph-chart-line-up"></i> Population Analytics

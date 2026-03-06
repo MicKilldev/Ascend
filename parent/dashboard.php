@@ -10,10 +10,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
 $parent_user_id = $_SESSION['id'];
 
 // Initializing the connected student
-$stmt = $conn->prepare("SELECT u.id as u_id, s.user_id as target_student_id, u.username as student_name, u.course 
+$stmt = $conn->prepare("SELECT u.id as u_id, s.user_id as student_user_id, u.username as student_name, u.course, s.student_number 
                         FROM parents p
-                        JOIN users u ON p.student_id = u.id
-                        LEFT JOIN students s ON u.id = s.user_id
+                        JOIN students s ON p.student_id = s.id
+                        JOIN users u ON s.user_id = u.id
                         WHERE p.user_id = ?");
 $stmt->bind_param("i", $parent_user_id);
 $stmt->execute();
@@ -27,8 +27,9 @@ if (!$student) {
     $course = "Information Technology";
 } else {
     $student_name = $student['student_name'];
-    $student_id = $student['target_student_id'] ?? $student['u_id']; // Prefer student user_id, fallback to internal id
+    $student_id = $student['student_user_id'];
     $course = $student['course'];
+    $student_number = $student['student_number'] ?: "24-1133-954";
 }
 
 // Balance data (Mocked but connected to student)
@@ -80,7 +81,7 @@ $parent_child_gpa = $gpa_count > 0 ? number_format($gpa_sum / $gpa_count, 2) : "
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3>Program</h3>
                 <h1 style="font-size: 1.5rem; margin-top: 10px;"><?php echo $course; ?></h1>
-                <div class="card-footer">Student ID: 24-1133-954</div>
+                <div class="card-footer">Student ID: <?php echo htmlspecialchars($student_number); ?></div>
             </div>
         </div>
 

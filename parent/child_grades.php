@@ -10,10 +10,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
 $parent_user_id = $_SESSION['id'];
 
 // Fetch the connected student
-$stmt = $conn->prepare("SELECT s.user_id, u.username as student_name, u.course 
+$stmt = $conn->prepare("SELECT s.user_id, u.username as student_name, u.course, s.student_number 
                         FROM parents p
-                        JOIN users u ON p.student_id = u.id
-                        JOIN students s ON u.id = s.user_id
+                        JOIN students s ON p.student_id = s.id
+                        JOIN users u ON s.user_id = u.id
                         WHERE p.user_id = ?");
 $stmt->bind_param("i", $parent_user_id);
 $stmt->execute();
@@ -30,6 +30,7 @@ if (!$student) {
     $student_name = $student['student_name'];
     $student_id = $student['user_id'];
     $course = $student['course'];
+    $student_number = $student['student_number'] ?: "24-1133-954";
 }
 
 // Fetch real grades for this student from the 'student_grades' table
@@ -113,7 +114,7 @@ if (empty($grades)) {
                 <h1>Academic Performance</h1>
                 <p>Tracking the verified grades of your child, <strong><?php echo $student_name; ?></strong>.</p>
             </div>
-            <div class="student-badge"><i class="ph ph-identification-card"></i> ID: 24-1133-954</div>
+            <div class="student-badge"><i class="ph ph-identification-card"></i> ID: <?php echo htmlspecialchars($student_number); ?></div>
         </div>
 
         <div class="grade-card">

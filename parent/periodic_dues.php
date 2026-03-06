@@ -10,8 +10,8 @@ $parent_user_id = $_SESSION['id'];
 $stmt = $conn->prepare("
     SELECT u.username as student_name, u.course, s.student_number, s.year_level 
     FROM parents p
-    JOIN users u ON p.student_id = u.id
-    LEFT JOIN students s ON u.id = s.user_id
+    JOIN students s ON p.student_id = s.id
+    JOIN users u ON s.user_id = u.id
     WHERE p.user_id = ?
 ");
 $stmt->bind_param("i", $parent_user_id);

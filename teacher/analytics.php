@@ -2,8 +2,8 @@
 session_start();
 include('../config/db.php');
 
-// Guard: ONLY School Admin can access population analytics
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'school_admin') {
+// Guard: ONLY Faculty/Teachers/Admins can access population analytics
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['teacher', 'faculty', 'school_admin'])) {
     header("Location: dashboard.php");
     exit();
 }
@@ -114,7 +114,8 @@ foreach ($months as $m) {
                             style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Majority
                             Program</label>
                         <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">
-                            <?php echo htmlspecialchars($majority_program); ?></div>
+                            <?php echo htmlspecialchars($majority_program); ?>
+                        </div>
                     </div>
                     <div
                         style="padding: 15px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #10b981;">
@@ -122,7 +123,8 @@ foreach ($months as $m) {
                             style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Top
                             Performing Batch</label>
                         <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">
-                            <?php echo htmlspecialchars($top_batch); ?></div>
+                            <?php echo htmlspecialchars($top_batch); ?>
+                        </div>
                     </div>
                     <div
                         style="padding: 15px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #f59e0b;">

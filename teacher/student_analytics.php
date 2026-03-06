@@ -52,15 +52,15 @@ $grades_data = [];
 $sum = 0;
 $passed = 0;
 
-// Need to safely check the grades table
+// Need to safely check the student_grades table
 // If a grade isn't there, we'll assign a placeholder or 0
 foreach ($subjects as $sub) {
-    $q = $conn->prepare("SELECT grade FROM grades WHERE student_id = ? AND subject = ?");
+    $q = $conn->prepare("SELECT average_grade FROM student_grades WHERE student_id = ? AND subject_name = ?");
     $q->bind_param("is", $student_id, $sub);
     $q->execute();
     $r = $q->get_result();
     if ($r->num_rows > 0) {
-        $val = floatval($r->fetch_assoc()['grade']);
+        $val = floatval($r->fetch_assoc()['average_grade']);
     } else {
         $val = 1.0 + (crc32($student_id . $sub) % 20) / 10; // Mock if empty
     }
@@ -350,7 +350,8 @@ $overall_percentage = getGpaPercent($gpa);
             <?php if ($role === 'school_admin'): ?>
                 <div
                     style="background: #f1f5f9; color: #64748b; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">
-                    <i class="ph ph-shield-check"></i> Audit Mode Active</div>
+                    <i class="ph ph-shield-check"></i> Audit Mode Active
+                </div>
             <?php endif; ?>
         </div>
 

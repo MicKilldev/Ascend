@@ -26,16 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_grade'])) {
     $val = floatval($_POST['grade']);
 
     // Upsert logic
-    $check = $conn->prepare("SELECT id FROM grades WHERE student_id = ? AND subject = ?");
+    $check = $conn->prepare("SELECT id FROM student_grades WHERE student_id = ? AND subject_name = ?");
     $check->bind_param("is", $sid, $subj);
     $check->execute();
     $res = $check->get_result();
 
     if ($res->num_rows > 0) {
-        $stmt = $conn->prepare("UPDATE grades SET grade = ? WHERE student_id = ? AND subject = ?");
+        $stmt = $conn->prepare("UPDATE student_grades SET average_grade = ? WHERE student_id = ? AND subject_name = ?");
         $stmt->bind_param("dis", $val, $sid, $subj);
     } else {
-        $stmt = $conn->prepare("INSERT INTO grades (student_id, subject, grade) VALUES (?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO student_grades (student_id, subject_name, average_grade, subject_code, subject_type, credits) VALUES (?, ?, ?, 'GEN', 'General', 3)");
         $stmt->bind_param("isd", $sid, $subj, $val);
     }
 
@@ -71,12 +71,12 @@ $subjects = ['Web Development', 'Database Systems', 'Data Structures', 'Network 
 // Helper to get grade
 function getGrade($conn, $sid, $subject)
 {
-    $q = $conn->prepare("SELECT grade FROM grades WHERE student_id = ? AND subject = ?");
+    $q = $conn->prepare("SELECT average_grade FROM student_grades WHERE student_id = ? AND subject_name = ?");
     $q->bind_param("is", $sid, $subject);
     $q->execute();
     $r = $q->get_result();
     if ($r->num_rows > 0) {
-        return $r->fetch_assoc()['grade'];
+        return $r->fetch_assoc()['average_grade'];
     }
     // Default mock if none exists
     return 1.0 + (crc32($sid . $subject) % 20) / 10;
@@ -218,9 +218,11 @@ function getGrade($conn, $sid, $subject)
                                     </div>
                                     <div>
                                         <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem;">
-                                            <?php echo htmlspecialchars($s['username']); ?></div>
+                                            <?php echo htmlspecialchars($s['username']); ?>
+                                        </div>
                                         <div style="font-size: 0.7rem; color: #94a3b8;">
-                                            <?php echo htmlspecialchars($s['course']); ?></div>
+                                            <?php echo htmlspecialchars($s['course']); ?>
+                                        </div>
                                     </div>
                                 </div>
                             </td>

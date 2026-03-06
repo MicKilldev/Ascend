@@ -10,9 +10,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
 $parent_user_id = $_SESSION['id'];
 
 // Initializing the connected student
-$stmt = $conn->prepare("SELECT u.id, u.username as student_name, u.course 
+$stmt = $conn->prepare("SELECT u.id as u_id, s.user_id as target_student_id, u.username as student_name, u.course 
                         FROM parents p
                         JOIN users u ON p.student_id = u.id
+                        LEFT JOIN students s ON u.id = s.user_id
                         WHERE p.user_id = ?");
 $stmt->bind_param("i", $parent_user_id);
 $stmt->execute();
@@ -26,7 +27,7 @@ if (!$student) {
     $course = "Information Technology";
 } else {
     $student_name = $student['student_name'];
-    $student_id = $student['id'];
+    $student_id = $student['target_student_id'] ?? $student['u_id']; // Prefer student user_id, fallback to internal id
     $course = $student['course'];
 }
 
@@ -34,6 +35,18 @@ if (!$student) {
 $total_assessed = 52000;
 $total_paid = 30000;
 $outstanding = $total_assessed - $total_paid;
+
+$gpa_query = $conn->prepare("SELECT average_grade FROM student_grades WHERE student_id = ?");
+$gpa_query->bind_param("i", $student_id);
+$gpa_query->execute();
+$gpa_res = $gpa_query->get_result();
+$gpa_sum = 0;
+$gpa_count = 0;
+while ($row = $gpa_res->fetch_assoc()) {
+    $gpa_sum += $row['average_grade'];
+    $gpa_count++;
+}
+$parent_child_gpa = $gpa_count > 0 ? number_format($gpa_sum / $gpa_count, 2) : "Enrolled";
 ?>
 
 <?php include("../includes/header.php"); ?>
@@ -56,7 +69,7 @@ $outstanding = $total_assessed - $total_paid;
         <div class="card-container" style="margin-bottom: 30px;">
             <div class="card">
                 <h3>Child's GPA</h3>
-                <h1>1.42</h1>
+                <h1><?php echo $parent_child_gpa; ?></h1>
                 <div class="card-footer" style="color: #10b981; font-weight: 600;">✓ Good Standing</div>
             </div>
             <div class="card">
@@ -73,7 +86,7 @@ $outstanding = $total_assessed - $total_paid;
 
         <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #0f172a;"><i class="ph ph-wallet"
                 style="color: #ef4444;"></i> Financial Oversight</h3>
-        <div class="card-container">
+        <div class="card-container" style="margin-bottom: 30px;">
             <a href="ledger.php" class="card"
                 style="border-left: 4px solid #ef4444; position: relative; text-decoration: none;">
                 <div style="position: absolute; top: 15px; right: 15px; color: #ef4444; font-size: 1.5rem;"><i
@@ -90,6 +103,35 @@ $outstanding = $total_assessed - $total_paid;
                 </div>
             </div>
         </div>
+
+        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #0f172a;"><i class="ph ph-calendar-check"
+                style="color: #8b5cf6;"></i> School Calendar & Events</h3>
+        <div class="card-container">
+            <div class="card" style="border-left: 4px solid #8b5cf6;">
+                <h3 style="color: #64748b;">Career Guidance Day</h3>
+                <h1 style="font-size: 1.3rem; margin-top: 10px; color: #1e293b;">March 15, 2026</h1>
+                <div class="card-footer">All graduating students</div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid #06b6d4;">
+                <h3 style="color: #64748b;">PE Day / Sports Fest</h3>
+                <h1 style="font-size: 1.3rem; margin-top: 10px; color: #1e293b;">March 22, 2026</h1>
+                <div class="card-footer">Wear assigned team colors</div>
+            </div>
+        </div>
+
+        <div
+            style="margin-top: 25px; padding: 15px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; display: flex; align-items: center; gap: 15px;">
+            <div style="background: #fee2e2; padding: 10px; border-radius: 50%;">
+                <i class="ph ph-megaphone" style="color: #ef4444; font-size: 1.2rem; display: block;"></i>
+            </div>
+            <p style="margin: 0; color: #991b1b; font-size: 0.85rem; line-height: 1.4;">
+                <strong>Notice:</strong> Sudden class suspensions (weather/emergencies) are announced directly in the
+                <strong>students' official Group Chats</strong>. Please coordinate with your child for real-time
+                updates.
+            </p>
+        </div>
+
     </div>
 </div>
 

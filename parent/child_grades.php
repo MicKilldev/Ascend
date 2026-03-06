@@ -32,15 +32,19 @@ if (!$student) {
     $course = $student['course'];
 }
 
-// Fetch real grades for this student from the 'grades' table
-$grade_stmt = $conn->prepare("SELECT subject, grade FROM grades WHERE student_id = ?");
+// Fetch real grades for this student from the 'student_grades' table
+$grade_stmt = $conn->prepare("SELECT subject_name as subject, average_grade as grade FROM student_grades WHERE student_id = ?");
 $grade_stmt->bind_param("i", $student_id);
 $grade_stmt->execute();
 $grades_res = $grade_stmt->get_result();
 $grades = [];
+$total_grade = 0;
 while ($g = $grades_res->fetch_assoc()) {
     $grades[] = $g;
+    $total_grade += $g['grade'];
 }
+
+$calculated_gpa = count($grades) > 0 ? number_format($total_grade / count($grades), 2) : "0.00";
 
 // If no grades, use defaults
 if (empty($grades)) {
@@ -130,7 +134,7 @@ if (empty($grades)) {
                 <div>
                     <div style="font-size: 0.75rem; opacity: 0.6; font-weight: 700; text-transform: uppercase;">Weighted
                         GPA</div>
-                    <div style="font-size: 1.5rem; font-weight: 800;">1.42</div>
+                    <div style="font-size: 1.5rem; font-weight: 800;"><?php echo $calculated_gpa; ?></div>
                 </div>
                 <div style="text-align: right;">
                     <button

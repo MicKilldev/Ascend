@@ -354,7 +354,7 @@ if (isset($_POST['login'])) {
             </form>
 
             <div class="footer-links">
-                <p>Forgot password? <a href="#">Contact your Administrator</a></p>
+                <p>Forgot password? <a href="mailto:admin@ascend.edu">Contact your Administrator</a></p>
                 <p style="margin-top: 10px; font-size: 0.72rem;">&copy; 2026 Ascend Educational Ecosystem</p>
             </div>
 

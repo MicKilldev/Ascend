@@ -11,8 +11,8 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'Student');
 $course = htmlspecialchars($_SESSION['course'] ?? 'BSIT');
 $student_id = $_SESSION['id']; // This is the user ID
 
-// Fetch all grades for this student from the 'grades' table
-$query = "SELECT subject, grade FROM grades WHERE student_id = ? ORDER BY subject ASC";
+// Fetch all grades for this student from the 'student_grades' table
+$query = "SELECT subject_name as subject, average_grade as grade, credits as units FROM student_grades WHERE student_id = ? ORDER BY subject_name ASC";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $student_id);
 $stmt->execute();
@@ -25,7 +25,7 @@ $grades_list = [];
 
 while ($row = $result->fetch_assoc()) {
     $grades_list[] = $row;
-    $total_units += 3; // Mocking 3 units per subject if not in DB
+    $total_units += isset($row['units']) ? $row['units'] : 3; // Mocking 3 units per subject if not in DB
     if ($row['grade'] <= 3.0) {
         $passed_count++;
     } else {
@@ -173,7 +173,7 @@ $gpa = (count($grades_list) > 0) ? number_format($sum_grades / count($grades_lis
             </div>
             <div class="stat-mini-card" style="border-top: 4px solid #10b981;">
                 <span class="stat-label">Units Completed</span>
-                <span class="stat-value"><?php echo count($grades_list) * 3; ?>.0</span>
+                <span class="stat-value"><?php echo $total_units; ?>.0</span>
             </div>
             <div class="stat-mini-card" style="border-top: 4px solid #00d2ff;">
                 <span class="stat-label">Academic Status</span>
@@ -206,12 +206,14 @@ $gpa = (count($grades_list) > 0) ? number_format($sum_grades / count($grades_lis
                             <tr>
                                 <td>
                                     <div style="font-weight: 800; color: #0f172a;">
-                                        <?php echo htmlspecialchars($g['subject']); ?></div>
+                                        <?php echo htmlspecialchars($g['subject']); ?>
+                                    </div>
                                     <div
                                         style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">
                                         Major Requirement</div>
                                 </td>
-                                <td style="text-align: center; font-weight: 700;">3.0</td>
+                                <td style="text-align: center; font-weight: 700;">
+                                    <?php echo isset($g['units']) ? htmlspecialchars($g['units']) : '3.0'; ?></td>
                                 <td style="text-align: center;">
                                     <span
                                         style="font-weight: 900; color: var(--primary); font-size: 1.2rem;"><?php echo number_format($g['grade'], 1); ?></span>

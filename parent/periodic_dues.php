@@ -5,6 +5,24 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
     header("Location: ../login.php?role=parent");
     exit();
 }
+
+$parent_user_id = $_SESSION['id'];
+$stmt = $conn->prepare("
+    SELECT u.username as student_name, u.course, s.student_number, s.year_level 
+    FROM parents p
+    JOIN users u ON p.student_id = u.id
+    LEFT JOIN students s ON u.id = s.user_id
+    WHERE p.user_id = ?
+");
+$stmt->bind_param("i", $parent_user_id);
+$stmt->execute();
+$student = $stmt->get_result()->fetch_assoc();
+
+$student_name = $student ? $student['student_name'] : "Mickael Garde";
+$student_number = ($student && $student['student_number']) ? $student['student_number'] : "24-1133-954";
+$course = ($student && $student['course']) ? $student['course'] : "Information Technology";
+$year_level = ($student && $student['year_level']) ? $student['year_level'] : "2";
+$course_yr = $course . ' - ' . $year_level;
 ?>
 <?php include("../includes/header.php"); ?>
 
@@ -152,11 +170,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
             <div class="header-info-grid">
                 <div class="info-item">
                     <span class="info-label">Student ID</span>
-                    <span class="info-val">24-1133-954</span>
+                    <span class="info-val"><?php echo htmlspecialchars($student_number); ?></span>
                 </div>
                 <div class="info-item" style="grid-column: span 3;">
                     <span class="info-label">Student Name</span>
-                    <span class="info-val">GARDE, NOLI JHON MICKAEL D.</span>
+                    <span class="info-val"><?php echo strtoupper(htmlspecialchars($student_name)); ?></span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Last Enrolled SY-Term</span>
@@ -164,7 +182,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'parent') {
                 </div>
                 <div class="info-item">
                     <span class="info-label">Last Enrolled Course-Yr</span>
-                    <span class="info-val">BSIT - 2</span>
+                    <span class="info-val"><?php echo strtoupper(htmlspecialchars($course_yr)); ?></span>
                 </div>
             </div>
         </div>

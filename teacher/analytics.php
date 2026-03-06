@@ -22,15 +22,23 @@ $programs = [
 ];
 
 $population_data = [];
+$labels = [];
+$data_counts = [];
 foreach ($programs as $prog) {
     $count = $conn->query("SELECT COUNT(*) as c FROM users WHERE role='student' AND course='$prog'")->fetch_assoc()['c'];
     $population_data[] = ['name' => $prog, 'count' => $count];
+    $labels[] = $prog;
+    $data_counts[] = $count;
 }
 
-// 2. Year Level Distribution (Mocking based on ID or created_at for Demo)
-// In a real system, you'd have a 'year_level' column. 
-// For now, we'll categorize based on volume.
+// 2. Year Level Distribution & Majority Program
 $total_students = $conn->query("SELECT COUNT(*) as c FROM users WHERE role='student'")->fetch_assoc()['c'];
+
+$maj_res = $conn->query("SELECT course FROM users WHERE role='student' GROUP BY course ORDER BY COUNT(*) DESC LIMIT 1");
+$majority_program = ($maj_res && $maj_res->num_rows > 0) ? $maj_res->fetch_assoc()['course'] : "N/A";
+
+$top_batch_res = $conn->query("SELECT year_level FROM students GROUP BY year_level ORDER BY COUNT(*) DESC LIMIT 1");
+$top_batch = ($top_batch_res && $top_batch_res->num_rows > 0) ? $top_batch_res->fetch_assoc()['year_level'] : "N/A";
 
 // 3. Growth Trend (Accounts created per month in 2026)
 $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -42,6 +50,7 @@ foreach ($months as $m) {
 ?>
 
 <?php include("../includes/header.php"); ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="container">
     <?php include("../includes/sidebar.php"); ?>
@@ -87,24 +96,8 @@ foreach ($months as $m) {
                     <i class="ph ph-users-four" style="color: #6e45e2; font-size: 1.5rem;"></i>
                     Program Distribution
                 </h3>
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <?php foreach ($population_data as $data):
-                        $percentage = ($total_students > 0) ? ($data['count'] / $total_students) * 100 : 0;
-                        ?>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span
-                                    style="font-weight: 700; color: #334155; font-size: 0.9rem;"><?php echo $data['name']; ?></span>
-                                <span style="font-weight: 800; color: #0f172a;"><?php echo $data['count']; ?>
-                                    Students</span>
-                            </div>
-                            <div style="height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden;">
-                                <div
-                                    style="width: <?php echo $percentage; ?>%; height: 100%; background: linear-gradient(90deg, #6e45e2, #a855f7); border-radius: 6px;">
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="programPieChart"></canvas>
                 </div>
             </div>
 
@@ -120,14 +113,16 @@ foreach ($months as $m) {
                         <label
                             style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Majority
                             Program</label>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">Information Technology</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">
+                            <?php echo htmlspecialchars($majority_program); ?></div>
                     </div>
                     <div
                         style="padding: 15px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #10b981;">
                         <label
                             style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Top
                             Performing Batch</label>
-                        <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">2nd Year Students</div>
+                        <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">
+                            <?php echo htmlspecialchars($top_batch); ?></div>
                     </div>
                     <div
                         style="padding: 15px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #f59e0b;">
@@ -184,5 +179,42 @@ foreach ($months as $m) {
         }
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('programPieChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: <?php echo json_encode($labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($data_counts); ?>,
+                    backgroundColor: [
+                        '#6e45e2',
+                        '#00d2ff',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: {
+                                family: 'Outfit'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 
 <?php include("../includes/footer.php"); ?>

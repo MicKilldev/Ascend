@@ -8,6 +8,7 @@ $portalTitles = [
     'faculty' => 'Teachers & Admin Portal',
     'student' => 'Student Portal',
     'parent' => 'Parent Portal',
+    'guest' => 'Hiring & Internships Portal',
     'general' => 'Student Success Launchpad'
 ];
 $displayTitle = $portalTitles[$selectedRole] ?? 'Ascend Login';
@@ -32,6 +33,7 @@ if (isset($_POST['login'])) {
             'faculty' => ['teacher', 'faculty', 'school_admin'],
             'student' => ['student'],
             'parent' => ['parent'],
+            'guest' => ['guest'],
             'general' => [] // Should redirect to specific portal
         ];
 
@@ -62,6 +64,9 @@ if (isset($_POST['login'])) {
                     break;
                 case 'parent':
                     header("Location: parent/dashboard.php");
+                    break;
+                case 'guest':
+                    header("Location: guest/dashboard.php");
                     break;
                 default:
                     header("Location: index.php");

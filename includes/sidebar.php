@@ -81,6 +81,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
 
+        <?php elseif ($role == 'guest'): ?>
+            <!-- Guest Portal -->
+            <li>
+                <a href="talents.php" class="<?php echo $current_page == 'talents.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-users-three"></i> Scout Talents
+                </a>
+            </li>
+            <li>
+                <a href="internships.php" class="<?php echo $current_page == 'internships.php' ? 'active' : ''; ?>">
+                    <i class="ph ph-briefcase"></i> Internships
+                </a>
+            </li>
+
         <?php endif; ?>
 
         <!-- Common Settings & Logout -->

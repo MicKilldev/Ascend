@@ -225,6 +225,11 @@
             color: #92fe9d;
         }
 
+        .card-guest .icon-box {
+            border-color: #ff9a9e;
+            color: #ff9a9e;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.5rem;
@@ -276,6 +281,18 @@
                 </div>
                 <h2>Parent Portal</h2>
                 <p>Monitor academic progress, view achievement milestones, and stay connected.</p>
+                <div class="btn-arrow">
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Guest/Hiring -->
+            <a href="login.php?role=guest" class="portal-card card-guest">
+                <div class="icon-box">
+                    <i class="ph-duotone ph-briefcase"></i>
+                </div>
+                <h2>Hiring & Internships</h2>
+                <p>Discover verified talent, explore student resumes, and bridge the industry skill gap.</p>
                 <div class="btn-arrow">
                     <i class="ph ph-arrow-right"></i>
                 </div>
